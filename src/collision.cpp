@@ -513,6 +513,7 @@ collisionMoveResult collisionMoveSimple(Environment *env, IGameDef *gamedef,
 
 			info.node_p = nearest_info.position;
 			info.object = nearest_info.obj;
+			info.new_pos = *pos_f;
 			info.old_speed = *speed_f;
 			info.plane = nearest_collided;
 
