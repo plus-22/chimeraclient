@@ -465,6 +465,8 @@ void MapblockMeshGenerator::drawSolidNode(std::set<content_t> xraySet)
 	if (data->m_smooth_lighting) {
 		LightPair lights[6][4];
 		for (int face = 0; face < 6; ++face) {
+			if (mask & (1 << face))
+				continue;
 			for (int k = 0; k < 4; k++) {
 				v3s16 corner = light_dirs[light_indices[face][k]];
 				lights[face][k] = LightPair(getSmoothLightSolid(
