@@ -199,9 +199,7 @@ public:
 	// get current frames per second value
 	s32 getFPS() const override;
 
-	//! returns amount of primitives (mostly triangles) were drawn in the last frame.
-	//! very useful method for statistics.
-	u32 getPrimitiveCountDrawn(u32 param = 0) const override;
+	SFrameStats getFrameStats() const override;
 
 	//! \return Returns the name of the video driver. Example: In case of the DIRECT3D8
 	//! driver, it would return "Direct3D8.1".
@@ -542,8 +540,6 @@ public:
 	virtual void convertColor(const void *sP, ECOLOR_FORMAT sF, s32 sN,
 			void *dP, ECOLOR_FORMAT dF) const override;
 
-	bool checkDriverReset() override { return false; }
-
 protected:
 	//! deletes all textures
 	void deleteAllTextures();
@@ -573,6 +569,12 @@ protected:
 
 	// prints renderer version
 	void printVersion();
+
+	inline void accountHWBufferUpload(u32 size)
+	{
+		FrameStats.HWBuffersUploaded++;
+		FrameStats.HWBuffersUploadedSize += size;
+	}
 
 	inline bool getWriteZBuffer(const SMaterial &material) const
 	{
@@ -700,8 +702,8 @@ protected:
 	core::matrix4 TransformationMatrix;
 
 	CFPSCounter FPSCounter;
+	SFrameStats FrameStats;
 
-	u32 PrimitivesDrawn;
 	u32 MinVertexCountForVBO;
 
 	u32 TextureCreationFlags;
