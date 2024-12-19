@@ -222,7 +222,7 @@ void set_default_settings()
 	// Keymap
 	settings->setDefault("remote_port", "30000");
 	settings->setDefault("keymap_forward", "KEY_KEY_W");
-	settings->setDefault("keymap_autoforward", "KEY_KEY_C");
+	settings->setDefault("keymap_autoforward", "");
 	settings->setDefault("keymap_backward", "KEY_KEY_S");
 	settings->setDefault("keymap_left", "KEY_KEY_A");
 	settings->setDefault("keymap_right", "KEY_KEY_D");
@@ -233,7 +233,7 @@ void set_default_settings()
 	settings->setDefault("keymap_drop", "KEY_KEY_Q");
 	settings->setDefault("keymap_zoom", "KEY_KEY_Z");
 	settings->setDefault("keymap_inventory", "KEY_KEY_I");
-	settings->setDefault("keymap_aux1", "");
+	settings->setDefault("keymap_aux1", "KEY_KEY_E");
 	settings->setDefault("keymap_chat", "KEY_KEY_T");
 	settings->setDefault("keymap_cmd", "/");
 	settings->setDefault("keymap_cmd_local", ".");
@@ -253,11 +253,11 @@ void set_default_settings()
 	// See https://github.com/minetest/minetest/issues/12792
 	settings->setDefault("keymap_rangeselect", has_touch ? "" : "");
 
-	settings->setDefault("keymap_freemove", "KEY_KEY_F");
+	settings->setDefault("keymap_freemove", "KEY_KEY_K");
 	settings->setDefault("keymap_pitchmove", "P");
 	settings->setDefault("keymap_fastmove", "KEY_KEY_J");
 	settings->setDefault("keymap_noclip", "KEY_KEY_H");
-	settings->setDefault("keymap_hotbar_next", "");
+	settings->setDefault("keymap_hotbar_next", "KEY_KEY_N");
 	settings->setDefault("keymap_hotbar_previous", "KEY_KEY_B");
 	settings->setDefault("keymap_mute", "KEY_KEY_M");
 	settings->setDefault("keymap_increase_volume", "");
