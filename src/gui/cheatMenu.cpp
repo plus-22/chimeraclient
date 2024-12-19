@@ -226,14 +226,14 @@ void CheatMenu::drawHUD(video::IVideoDriver *driver, double dtime)
 		for (auto cheat = (*category)->m_cheats.begin();
 				cheat != (*category)->m_cheats.end(); cheat++) {
 			if ((*cheat)->is_enabled()) {
-				if ((*cheat)->m_name == "FastHit") {
-					(*cheat)->set_info_text("x"+g_settings->get("spamclick_multiplier"));
-				}
+				//if ((*cheat)->m_name == "FastHit") {
+				//	(*cheat)->set_info_text("x"+g_settings->get("spamclick_multiplier"));
+				//}
 				std::string cheat_str = (*cheat)->m_name;
-				std::string info_text = (*cheat)->get_info_text();
-				if (!info_text.empty()) {
-					cheat_str += " [" + info_text + "]";
-				}
+				//std::string info_text = (*cheat)->get_info_text();
+				//if (!info_text.empty()) {
+				//	cheat_str += " [" + info_text + "]";
+				//}
 				core::dimension2d<u32> dim = 
 							m_font->getDimension(utf8_to_wide(cheat_str).c_str());
 				enabled_cheats.push_back(std::make_pair(cheat_str, dim));
@@ -289,12 +289,16 @@ void CheatMenu::drawHUD(video::IVideoDriver *driver, double dtime)
 	}
 
 	int i = 0;
-	video::SColor infoColor(230, 230, 230, 230);
+	//video::SColor infoColor(230, 230, 230, 230);
 	for (std::pair<std::string, core::dimension2d<u32>> &cheat : enabled_cheats) {
-		std::string cheat_full_str = cheat.first;
+		std::string cheat_str = cheat.first;
 		core::dimension2d<u32> dim = cheat.second;
+        
+        u32 x = screensize.Width - 5 - dim.Width;
+        core::rect<s32> fontbounds(x, y, x + dim.Width, y + dim.Height);
+	    m_font->draw(cheat_str.c_str(), fontbounds, colors[i], false, false);
 
-		size_t brace_position = cheat_full_str.find('[');
+		/*size_t brace_position = cheat_full_str.find('[');
 		if (brace_position != std::string::npos) {
 			std::string cheat_str = cheat_full_str.substr(0, brace_position);
 			std::string info_str = cheat_full_str.substr(brace_position);
@@ -306,9 +310,9 @@ void CheatMenu::drawHUD(video::IVideoDriver *driver, double dtime)
 			u32 x_info = x_cheat + cheat_dim.Width;
 
 			core::rect<s32> cheat_bounds(x_cheat, y, x_cheat + cheat_dim.Width, y + cheat_dim.Height);
-			m_font->draw(cheat_str.c_str(), cheat_bounds, colors[i], false, false);
+			m_font->draw(cheat_str.c_str(), cheat_bounds, colors[i], false, false);*/   
 
-			core::rect<s32> info_bounds(x_info, y, x_info + info_dim.Width, y + info_dim.Height);
+			/*core::rect<s32> info_bounds(x_info, y, x_info + info_dim.Width, y + info_dim.Height);
 			m_font->draw(info_str.c_str(), info_bounds, infoColor, false, false);
 
 		} else {
@@ -316,7 +320,7 @@ void CheatMenu::drawHUD(video::IVideoDriver *driver, double dtime)
 
 			core::rect<s32> cheat_bounds(x, y, x + dim.Width, y + dim.Height);
 			m_font->draw(cheat_full_str.c_str(), cheat_bounds, colors[i], false, false);
-		}
+		}*/
 
 		if (mapper != nullptr && mapper->getModeIndex() == 0) {
 			y += dim.Height;
