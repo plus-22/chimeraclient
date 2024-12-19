@@ -3,6 +3,7 @@
 local switched_to_totem = 0
 local totem_move_action = InventoryAction("move")
 totem_move_action:to("current_player", "offhand", 1)
+minetest.settings:set_bool("crystalspam", false)
 minetest.settings:set_bool("autototem", false)
 
 minetest.register_globalstep(function(dtime)

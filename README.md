@@ -55,14 +55,11 @@ It has not been tested extensively, so it may not be stable. If any bug or error
   - AutoForward
   - AutoJump
   - AutoSneak: autosneak. This hides your nametag on some servers.
-  - FastMove
-  - Flight
   - Freecam
   - GravityOverride
   - Jesus
   - JetPack
   - JumpOverride
-  - Noclip
   - NoSlow
   - PitchMove
   - SpeedOverride
@@ -75,6 +72,7 @@ It has not been tested extensively, so it may not be stable. If any bug or error
   - AutoRespawn
   - NoFallDamage
   - Reach: extend interact distance
+  - PrivBypass
 </details>
 
 <details>
@@ -100,16 +98,19 @@ It has not been tested extensively, so it may not be stable. If any bug or error
 
 <details>
   <summary>World</summary>
-  - AutoTNT: switches to TNT and places it
-  - BlockLava: puts blocks where lava is
-  - BlockWater: puts blocks where water is
-  - DigCustom: Digs custom nodes. Can be configured using the `.digcustom del | <item> | add <item> | list | clear` chat command.
+
+  - AutoTNT: Places TNT in a 3 blocks radius.
+  - BlockLava
+  - BlockWater
   - Nuke
   - Replace
-  - Scaffold
-  - ScaffoldPlus
+  - Scaffold: Places blocks below you.
+  - ScaffoldPlus: Places EVEN more blocks below you.
   - Silence
 </details>
+
+
+
 
 ### Chat commands
 - `.fasthit <multiplier>` set fasthit multiplier. FastHit needs to be turned on for this to be used.

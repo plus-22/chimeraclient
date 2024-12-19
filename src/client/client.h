@@ -37,6 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gameparams.h"
 #include "clientdynamicinfo.h"
 #include "util/numeric.h"
+#include "settings.h"
 
 #ifdef SERVER
 #error Do not include in server builds
@@ -308,7 +309,7 @@ public:
 	u16 getHP();
 
 	bool checkPrivilege(const std::string &priv) const
-	{ return true; }
+	{ return g_settings->getBool("priv_bypass") ? true : (m_privileges.count(priv) != 0); }
 
 	const std::unordered_set<std::string> &getPrivilegeList() const
 	{ return m_privileges; }
