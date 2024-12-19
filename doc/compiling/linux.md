@@ -69,14 +69,14 @@ For Void users:
 
 Download source (this is the URL to the latest of source repository, which might not work at all times) using Git:
 
-    git clone --depth 1 https://github.com/otterminetest/OtterClient.git
-    cd OtterClient
+    git clone --depth 1 https://github.com/plus-22/chimeraclient.git
+    cd chimeraclient
 
 Download source, without using Git:
 
-    wget https://github.com/otterminetest/OtterClient/archive/master.tar.gz
+    wget https://github.com/plus-22/chimeraclient/archive/master.tar.gz
     tar xf master.tar.gz
-    cd OtterClient-master
+    cd chimeraclient-master
 
 ## Build
 
