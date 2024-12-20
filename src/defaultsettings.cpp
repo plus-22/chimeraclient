@@ -188,7 +188,7 @@ void set_default_settings()
 	settings->setDefault("fullbright", "true");
 	settings->setDefault("friends", "{}");
 	settings->setDefault("ctf_servers", "");
-	settings->setDefault("killaura.players", "true");
+	settings->setDefault("killaura.players", "false");
 	settings->setDefault("killaura.entities", "false");
 	settings->setDefault("killaura.assist", "false");
 	settings->setDefault("punch_interval", "auto");
@@ -196,10 +196,12 @@ void set_default_settings()
 	settings->setDefault("reach", "false");
 	settings->setDefault("randomize_version", "false"); //randomize the version the client sends to the server on-join
 	settings->setDefault("priv_bypass_extra", "true"); //other priv bypass stuff. misc.
+    settings->setDefault("priv_bypass", "false");
 	settings->setDefault("autotool", "false");
     settings->setDefault("dont_point_nodes", "false");
 	settings->setDefault("small_post_effect_color", "false");
     settings->setDefault("no_hurt_cam", "false");
+    settings->setDefault("crystalspam", "false");
 
 	settings->setDefault("esp.player.drawType", "0");
 	settings->setDefault("esp.player.edgeOpacity", "255");
@@ -242,7 +244,7 @@ void set_default_settings()
 	
 	settings->setDefault("keymap_toggle_freecam", "KEY_KEY_G");
 	settings->setDefault("keymap_toggle_killaura", "KEY_KEY_X");
-	settings->setDefault("keymap_toggle_crystalspam", "KEY_KEY_N");
+	settings->setDefault("keymap_toggle_crystalspam", "KEY_KEY_Y");
 
 	settings->setDefault("keymap_select_up", "KEY_UP");
 	settings->setDefault("keymap_select_down", "KEY_DOWN");
