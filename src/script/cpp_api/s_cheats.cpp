@@ -36,13 +36,13 @@ ScriptApiCheatsCheat::ScriptApiCheatsCheat(const std::string &name, const int &f
 {
 }
 
-void ScriptApiCheatsCheat::set_info_text(std::string infoText) {
+/*void ScriptApiCheatsCheat::set_info_text(std::string infoText) {
 	m_info_text = infoText;
 }
 
 std::string ScriptApiCheatsCheat::get_info_text() {
 	return m_info_text;
-}
+}*/
 
 bool ScriptApiCheatsCheat::is_enabled()
 {
@@ -101,13 +101,13 @@ void ScriptApiCheatsCategory::read_cheats(lua_State *L)
 	}
 }
 
-ScriptApiCheatsCheat* ScriptApiCheatsCategory::get_cheat(const std::string &name) {
+/*ScriptApiCheatsCheat* ScriptApiCheatsCategory::get_cheat(const std::string &name) {
 	for (auto& cheat : m_cheats) {
 		if (cheat->m_name == name) 
 			return cheat;
 	}
 	return nullptr;
-}
+}*/
 
 ScriptApiCheats::~ScriptApiCheats()
 {
@@ -166,10 +166,10 @@ void ScriptApiCheats::toggle_cheat(ScriptApiCheatsCheat *cheat)
 	cheat->toggle(L, error_handler);
 }
 
-ScriptApiCheatsCategory* ScriptApiCheats::get_category(const std::string &name) {
+/*ScriptApiCheatsCategory* ScriptApiCheats::get_category(const std::string &name) {
     for (auto& category : m_cheat_categories) {
         if (category->m_name == name) 
             return category;
     }
     return nullptr;
-}
+}*/

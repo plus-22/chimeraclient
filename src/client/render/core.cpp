@@ -106,7 +106,7 @@ v2u32 RenderingCore::getVirtualSize() const
 	return virtual_size;
 }
 
-std::string getEspInfoText(bool enabled, int drawType, int count) {
+/*std::string getEspInfoText(bool enabled, int drawType, int count) {
     if (!enabled)
         return "";
 
@@ -122,7 +122,7 @@ std::string getEspInfoText(bool enabled, int drawType, int count) {
         default:
             return "";
     }
-}
+}*/
 
 void RenderingCore::drawTracersAndESP()
 {
@@ -154,11 +154,11 @@ void RenderingCore::drawTracersAndESP()
 	int tunnelEO = g_settings->getU32("esp.tunnel.edgeOpacity");
 	int tunnelFO = g_settings->getU32("esp.tunnel.faceOpacity");
 
-	ScriptApiCheatsCategory* render_category = client->getScript()->get_category("Render");
-	ScriptApiCheatsCheat* player_esp_cheat = render_category->get_cheat("PlayerESP");
-	ScriptApiCheatsCheat* entity_esp_cheat = render_category->get_cheat("EntityESP");
-	ScriptApiCheatsCheat* node_esp_cheat = render_category->get_cheat("NodeESP");
-	ScriptApiCheatsCheat* tunnel_esp_cheat = render_category->get_cheat("TunnelESP");
+	//ScriptApiCheatsCategory* render_category = client->getScript()->get_category("Render");
+	//ScriptApiCheatsCheat* player_esp_cheat = render_category->get_cheat("PlayerESP");
+	//ScriptApiCheatsCheat* entity_esp_cheat = render_category->get_cheat("EntityESP");
+	//ScriptApiCheatsCheat* node_esp_cheat = render_category->get_cheat("NodeESP");
+	//ScriptApiCheatsCheat* tunnel_esp_cheat = render_category->get_cheat("TunnelESP");
 
 	ClientEnvironment &env = client->getEnv();
 	ClientMap &clientMap = env.getClientMap();
@@ -307,7 +307,7 @@ void RenderingCore::drawTracersAndESP()
 	driver->setMaterial(oldmaterial);
 
 	// set info text
-	std::string pEspInfo = getEspInfoText(draw_player_esp, playerDT, pCnt);
+/*	std::string pEspInfo = getEspInfoText(draw_player_esp, playerDT, pCnt);
 	if (!pEspInfo.empty()) {
 		player_esp_cheat->set_info_text(pEspInfo);
 	}
@@ -322,7 +322,7 @@ void RenderingCore::drawTracersAndESP()
 	std::string tEspInfo = getEspInfoText(draw_tunnel_esp, tunnelDT, tCnt);
 	if (!tEspInfo.empty()) {
 		tunnel_esp_cheat->set_info_text(tEspInfo);
-	}
+	}*/
 }
 
 void RenderingCore::Draw3D(PipelineContext &context)
