@@ -1708,28 +1708,17 @@ bool GenericCAO::visualExpiryRequired(const ObjectProperties &new_) const
 		(uses_legacy_texture && old.textures != new_.textures);
 }
 
-void GenericCAO::processMessage(const std::string &data)
+
+
+
+void GenericCAO::setProperties(ObjectProperties newprops)
 {
-	//infostream<<"GenericCAO: Got message"<<std::endl;
-	std::istringstream is(data, std::ios::binary);
-	// command
-	u8 cmd = readU8(is);
-	if (cmd == AO_CMD_SET_PROPERTIES) {
-		ObjectProperties newprops;
-		newprops.show_on_minimap = m_is_player; // default
-
-		newprops.deSerialize(is);
-
-		// Check what exactly changed
+// Check what exactly changed
 		bool expire_visuals = visualExpiryRequired(newprops);
 		bool textures_changed = m_prop.textures != newprops.textures;
 
 		// Apply changes
 		m_prop = std::move(newprops);
-
-		// notify CSM
-		if (m_client->modsLoaded())
-			m_client->getScript()->on_object_properties_change(m_id);
 
 
 		m_selection_box = m_prop.selectionbox;
@@ -1773,6 +1762,31 @@ void GenericCAO::processMessage(const std::string &data)
 			updateNametag();
 			updateMarker();
 		}
+}
+
+
+
+
+void GenericCAO::processMessage(const std::string &data)
+{
+	//infostream<<"GenericCAO: Got message"<<std::endl;
+	std::istringstream is(data, std::ios::binary);
+	// command
+	u8 cmd = readU8(is);
+	if (cmd == AO_CMD_SET_PROPERTIES) {
+		ObjectProperties newprops;
+		newprops.show_on_minimap = m_is_player; // default
+
+		newprops.deSerialize(is);
+        setProperties(newprops);
+
+		
+        
+        		// notify CSM
+		if (m_client->modsLoaded())
+			m_client->getScript()->on_object_properties_change(m_id);
+
+        
 	} else if (cmd == AO_CMD_UPDATE_POSITION) {
 		// Not sent by the server if this object is an attachment.
 		// We might however get here if the server notices the object being detached before the client.

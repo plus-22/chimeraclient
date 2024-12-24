@@ -82,10 +82,10 @@ private:
 
 	
 	// get_properties(self)
-	//static int l_get_properties(lua_State *L);
+	static int l_get_properties(lua_State *L);
 
 	// set_properties(self, properties)
-	//tatic int l_set_properties(lua_State *L);
+	static int l_set_properties(lua_State *L);
 	
 
 	// get_hp(self)
