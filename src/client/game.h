@@ -74,6 +74,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 #include "shader.h"
 #include "gui/cheatMenu.h"
+#include "gui/NewMenu.h"
 #include "threading/lambda.h"
 #include "translation.h"
 #include "util/basic_macros.h"
@@ -919,6 +920,7 @@ public:
 	std::unique_ptr<GameUI> m_game_ui;
 	GUIChatConsole *gui_chat_console = nullptr; // Free using ->Drop()
 	CheatMenu *m_cheat_menu = nullptr;
+    NewMenu *new_menu = nullptr;
 	MapDrawControl *draw_control = nullptr;
 	Camera *camera = nullptr;
 	Clouds *clouds = nullptr;	                  // Free using ->Drop()

@@ -148,6 +148,7 @@ void set_default_settings()
 	settings->setDefault("cheat_menu_head_height", "40");
 	settings->setDefault("cheat_menu_entry_height", "35");
 	settings->setDefault("cheat_menu_entry_width", "165");
+    settings->setDefault("use_old_menu", "false");
 
 	// Cheats
 	settings->setDefault("xray", "false");
@@ -244,7 +245,7 @@ void set_default_settings()
 	
 	settings->setDefault("keymap_toggle_freecam", "KEY_KEY_G");
 	settings->setDefault("keymap_toggle_killaura", "KEY_KEY_X");
-	settings->setDefault("keymap_toggle_crystalspam", "KEY_KEY_Y");
+	settings->setDefault("keymap_toggle_crystalspam", "KEY_KEY_N");
 
 	settings->setDefault("keymap_select_up", "KEY_UP");
 	settings->setDefault("keymap_select_down", "KEY_DOWN");

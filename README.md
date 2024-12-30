@@ -11,7 +11,14 @@ This client includes almost all CSM api additions from dragonfire, although it h
 It has not been tested extensively, so it may not be stable. If any bug or error is found, please open an issue about it.
 
 # Features
-### Cheat menu
+### Menus
+  - Quick Menu: Dragonfire cheat menu. Use arrow keys to navegate through it and enter key to toggle cheats.
+  - Click Menu: Use F8 key to open it. It displays different windows for each category and they can be moved. This menu was first implemented in [MineBoost Client](https://www.github.com/FoxLoveFire/MineBoost) by [Maintainer_ / FoxLoveFire](https://github.com/FoxLoveFire/), all credit goes to him.
+
+
+Menus can be toggled with the "QuickMenu" cheat in Player category.
+
+### Cheats
 <details>
   <summary>Combat</summary>
 
@@ -55,11 +62,14 @@ It has not been tested extensively, so it may not be stable. If any bug or error
   - AutoForward
   - AutoJump
   - AutoSneak: autosneak. This hides your nametag on some servers.
+  - FastMove
+  - Flight
   - Freecam
   - GravityOverride
   - Jesus
   - JetPack
   - JumpOverride
+  - Noclip
   - NoSlow
   - PitchMove
   - SpeedOverride
@@ -73,6 +83,7 @@ It has not been tested extensively, so it may not be stable. If any bug or error
   - NoFallDamage
   - Reach: extend interact distance
   - PrivBypass
+  - QuickMenu: switch from the click menu (new) to the quick menu (old)
 </details>
 
 <details>
@@ -98,19 +109,16 @@ It has not been tested extensively, so it may not be stable. If any bug or error
 
 <details>
   <summary>World</summary>
-
-  - AutoTNT: Places TNT in a 3 blocks radius.
-  - BlockLava
-  - BlockWater
+  - AutoTNT: switches to TNT and places it
+  - BlockLava: puts blocks where lava is
+  - BlockWater: puts blocks where water is
+  - DigCustom: Digs custom nodes. Can be configured using the `.digcustom del | <item> | add <item> | list | clear` chat command.
   - Nuke
   - Replace
-  - Scaffold: Places blocks below you.
-  - ScaffoldPlus: Places EVEN more blocks below you.
+  - Scaffold
+  - ScaffoldPlus
   - Silence
 </details>
-
-
-
 
 ### Chat commands
 - `.fasthit <multiplier>` set fasthit multiplier. FastHit needs to be turned on for this to be used.
