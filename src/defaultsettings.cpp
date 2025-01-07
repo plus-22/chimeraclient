@@ -149,6 +149,9 @@ void set_default_settings()
 	settings->setDefault("cheat_menu_entry_height", "35");
 	settings->setDefault("cheat_menu_entry_width", "165");
     settings->setDefault("use_old_menu", "false");
+    settings->setDefault("newmenu_draw_type_full", "false");
+    settings->setDefault("newmenu_draw_type_small", "false");
+    settings->setDefault("newmenu_draw_type_meteor", "true");
 
 	// Cheats
 	settings->setDefault("xray", "false");
@@ -203,6 +206,8 @@ void set_default_settings()
 	settings->setDefault("small_post_effect_color", "false");
     settings->setDefault("no_hurt_cam", "false");
     settings->setDefault("crystalspam", "false");
+    settings->setDefault("no_force_rotate", "false");
+    settings->setDefault("no_night", "false");
 
 	settings->setDefault("esp.player.drawType", "0");
 	settings->setDefault("esp.player.edgeOpacity", "255");

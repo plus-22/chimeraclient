@@ -14,6 +14,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 #include "NewMenu.h"
+#include "settings.h"
 #include <iostream>
 
 
@@ -45,7 +46,7 @@ void NewMenu::create()
 
     if (!m_rectsCreated) {
         for (size_t i = 0; i < script->m_cheat_categories.size(); i++) {
-            categoryRects.push_back(createRect(20, 20 + i * (rectHeight + 10))); 
+            categoryRects.push_back(createRect(20 + i * (rectWidth + 5), 20));  
             selectedCategory.push_back(false); 
             subCategoryRects.push_back(std::vector<core::rect<s32>>());
         }
@@ -208,12 +209,31 @@ void NewMenu::draw()
                   //  driver->draw2DRectangleOutline(core::rect<s32>(subRect.UpperLeftCorner.X - 1, subRect.UpperLeftCorner.Y - 1, subRect.LowerRightCorner.X + 1, subRect.LowerRightCorner.Y + 1), outlineColor);
 
                     const auto& functionName = script->m_cheat_categories[i]->m_cheats[j]->m_name;
-                    std::wstring wFunctionName = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(functionName);
-                    if (script->m_cheat_categories[i]->m_cheats[j]->is_enabled()) {
-                        subCategoryColors[i][j] = video::SColor(210, 53, 118, 189);
-                    } else {
-                        subCategoryColors[i][j] = video::SColor(173, 43, 55, 69);
+                    std::wstring wFunctionName = std::wstring_convert<std::codecvt_utf8<wchar_t>>().from_bytes(functionName);   
+                    subCategoryColors[i][j] = video::SColor(173, 43, 55, 69);
+                    if (g_settings->getBool("newmenu_draw_type_full")) {
+                         if (script->m_cheat_categories[i]->m_cheats[j]->is_enabled()) {
+                           subCategoryColors[i][j] = video::SColor(210, 53, 118, 189);
+                        } else {
+                            subCategoryColors[i][j] = video::SColor(173, 43, 55, 69);
+                        }
                     }
+
+                    if (g_settings->getBool("newmenu_draw_type_small")) {
+                        if (script->m_cheat_categories[i]->m_cheats[j]->is_enabled()) {
+                            driver->draw2DRectangle(video::SColor(210, 53, 118, 189), core::rect<s32>(subRect.UpperLeftCorner.X + 3, subRect.UpperLeftCorner.Y + 3, subRect.LowerRightCorner.X - 3, subRect.LowerRightCorner.Y - 3));
+                        }
+                    }
+                    
+                    if (g_settings->getBool("newmenu_draw_type_meteor")) {
+                         if (script->m_cheat_categories[i]->m_cheats[j]->is_enabled()) {
+                           subCategoryColors[i][j] = video::SColor(173, 78, 88, 100);
+                           driver->draw2DRectangle(video::SColor(210, 33, 98, 169), core::rect<s32>(subRect.UpperLeftCorner.X, subRect.UpperLeftCorner.Y, subRect.LowerRightCorner.X - 170, subRect.LowerRightCorner.Y));
+                        } else {
+                            subCategoryColors[i][j] = video::SColor(173, 43, 55, 69);
+                        }
+                    }
+
                     core::dimension2d<u32> functionTextSizeU32 = font->getDimension(wFunctionName.c_str());
                     core::dimension2d<s32> functionTextSize(functionTextSizeU32.Width, functionTextSizeU32.Height);
 

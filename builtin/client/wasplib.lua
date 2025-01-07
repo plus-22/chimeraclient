@@ -1,6 +1,7 @@
 -- Credits to cora
 
 ws = {}
+autotool = {}
 ws.registered_globalhacks = {}
 ws.displayed_wps={}
 
@@ -618,4 +619,9 @@ function ws.playeron(p)
 		if v == p then return true end
 	end
 	return false
+end
+
+
+function autotool.select_best_tool(nodename)
+	return ws.select_best_tool(nodename)
 end

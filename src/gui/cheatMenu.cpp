@@ -255,7 +255,7 @@ void CheatMenu::drawHUD(video::IVideoDriver *driver, double dtime)
 
 	Minimap *mapper = m_client->getMinimap();
 	if (mapper != nullptr && mapper->getModeIndex() != 0)
-		y = screensize.Height - 15;
+		y = screensize.Height - 18;
 
 	std::vector<video::SColor> colors;
 

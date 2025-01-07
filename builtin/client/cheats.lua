@@ -14,7 +14,7 @@ core.cheats = {
 		["Jesus"] = "jesus",
 		["NoSlow"] = "no_slow",
 		["JetPack"] = "jetpack",
-		--["AntiSlip"] = "antislip",
+		["AntiSlip"] = "antislip",
 		["AirJump"] = "airjump",
 		["Spider"] = "spider",
 		["AutoSneak"] = "autosneak",
@@ -36,6 +36,7 @@ core.cheats = {
 		["TunnelTracers"] = "enable_tunnel_tracers",
 		["NoRender"] = "norender.particles",
         ["NoDrownCam"] = "small_post_effect_color", 
+        ["BrightNight"] = "no_night", 
 	},
 	["Interact"] = {
 		["FastDig"] = "fastdig",
@@ -49,7 +50,7 @@ core.cheats = {
 	},
 	["Player"] = {
 		["NoFallDamage"] = "prevent_natural_damage",
-		--["NoForceRotate"] = "no_force_rotate",
+		["NoForceRotate"] = "no_force_rotate",
 		["Reach"] = "reach",
 		--["PointLiquids"] = "point_liquids",
 		["AutoRespawn"] = "autorespawn",
