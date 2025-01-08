@@ -814,7 +814,7 @@ void read_content_features(lua_State *L, ContentFeatures &f, int index)
 
 	f.setDefaultAlphaMode();
 
-	warn_if_field_exists(L, index, "alpha",
+	warn_if_field_exists(L, index, "alpha", "node " + f.name,
 		"Obsolete, only limited compatibility provided; "
 		"replaced by \"use_texture_alpha\"");
 	if (getintfield_default(L, index, "alpha", 255) != 255)
@@ -822,7 +822,7 @@ void read_content_features(lua_State *L, ContentFeatures &f, int index)
 
 	lua_getfield(L, index, "use_texture_alpha");
 	if (lua_isboolean(L, -1)) {
-		warn_if_field_exists(L, index, "use_texture_alpha",
+		warn_if_field_exists(L, index, "use_texture_alpha", "node " + f.name,
 			"Boolean values are deprecated; use the new choices");
 		if (lua_toboolean(L, -1))
 			f.alpha = (f.drawtype == NDT_NORMAL) ? ALPHAMODE_CLIP : ALPHAMODE_BLEND;
@@ -1390,13 +1390,16 @@ void pushnode(lua_State *L, const MapNode &n)
 }
 
 /******************************************************************************/
-void warn_if_field_exists(lua_State *L, int table,
-		const char *name, const std::string &message)
+void warn_if_field_exists(lua_State *L, int table, const char *fieldname,
+		std::string_view name, std::string_view message)
 {
-	lua_getfield(L, table, name);
+	lua_getfield(L, table, fieldname);
 	if (!lua_isnil(L, -1)) {
-		warningstream << "Field \"" << name << "\": "
-				<< message << std::endl;
+		warningstream << "Field \"" << fieldname << "\"";
+		if (!name.empty()) {
+			warningstream << " on " << name;
+		}
+		warningstream << ": " << message << std::endl;
 		infostream << script_get_backtrace(L) << std::endl;
 	}
 	lua_pop(L, 1);
@@ -2579,6 +2582,27 @@ static const char *collision_axis_str[] = {
 
 void push_collision_move_result(lua_State *L, const collisionMoveResult &res)
 {
+	// use faster Lua helper if possible
+	if (res.collisions.size() == 1 && res.collisions.front().type == COLLISION_NODE) {
+		lua_rawgeti(L, LUA_REGISTRYINDEX, CUSTOM_RIDX_PUSH_MOVERESULT1);
+		const auto &c = res.collisions.front();
+		lua_pushboolean(L, res.touching_ground);
+		lua_pushboolean(L, res.collides);
+		lua_pushboolean(L, res.standing_on_object);
+		assert(c.axis != COLLISION_AXIS_NONE);
+		lua_pushinteger(L, static_cast<int>(c.axis));
+		lua_pushinteger(L, c.node_p.X);
+		lua_pushinteger(L, c.node_p.Y);
+		lua_pushinteger(L, c.node_p.Z);
+		for (v3f v : {c.new_pos / BS, c.old_speed / BS, c.new_speed / BS}) {
+			lua_pushnumber(L, v.X);
+			lua_pushnumber(L, v.Y);
+			lua_pushnumber(L, v.Z);
+		}
+		lua_call(L, 3 + 1 + 3 + 3 * 3, 1);
+		return;
+	}
+
 	lua_createtable(L, 0, 4);
 
 	setboolfield(L, -1, "touching_ground", res.touching_ground);
@@ -2589,7 +2613,7 @@ void push_collision_move_result(lua_State *L, const collisionMoveResult &res)
 	lua_createtable(L, res.collisions.size(), 0);
 	int i = 1;
 	for (const auto &c : res.collisions) {
-		lua_createtable(L, 0, 5);
+		lua_createtable(L, 0, 6);
 
 		lua_pushstring(L, collision_type_str[c.type]);
 		lua_setfield(L, -2, "type");
@@ -2605,6 +2629,9 @@ void push_collision_move_result(lua_State *L, const collisionMoveResult &res)
 			push_objectRef(L, c.object->getId());
 			lua_setfield(L, -2, "object");
 		}
+
+		push_v3f(L, c.new_pos / BS);
+		lua_setfield(L, -2, "new_pos");
 
 		push_v3f(L, c.old_speed / BS);
 		lua_setfield(L, -2, "old_velocity");

@@ -29,7 +29,7 @@ For Fedora users:
 
 For openSUSE users:
 
-	sudo zypper install gcc cmake libjpeg8-devel libpng16-devel openal-soft-devel libcurl-devel sqlite3-devel luajit-devel libzstd-devel Mesa-libGL-devel libvorbis-devel freetype2-devel SDL2-devel
+	sudo zypper install gcc gcc-c++ cmake libjpeg8-devel libpng16-devel openal-soft-devel libcurl-devel sqlite3-devel luajit-devel libzstd-devel Mesa-libGL-devel libvorbis-devel freetype2-devel SDL2-devel
 
 For Arch users:
 
@@ -41,7 +41,7 @@ For Alpine users:
 
 For Void users:
 
-    sudo xbps-install cmake libpng-devel jpeg-devel mesa sqlite-devel libogg-devel libvorbis-devel libopenal-devel libcurl-devel freetype-devel zlib-devel gmp-devel jsoncpp-devel LuaJIT-devel libzstd-devel gettext SDL2-devel
+    sudo xbps-install cmake libpng-devel jpeg-devel mesa sqlite-devel libogg-devel libvorbis-devel libopenal-devel libcurl-devel freetype-devel zlib-devel gmp-devel jsoncpp-devel LuaJIT-devel zstd libzstd-devel gettext SDL2-devel
 
 ## Download
 

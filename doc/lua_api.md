@@ -4,6 +4,7 @@ Minetest Lua Modding API Reference
 * More information at <http://www.minetest.net/>
 * Developer Wiki: <http://dev.minetest.net/>
 * (Unofficial) Minetest Modding Book by rubenwardy: <https://rubenwardy.com/minetest_modding_book/>
+* Modding tools: <https://github.com/minetest/modtools>
 
 Introduction
 ------------
@@ -63,6 +64,8 @@ The game directory can contain the following files:
     * `name`: (Deprecated) same as title.
     * `description`: Short description to be shown in the content tab.
       See [Translating content meta](#translating-content-meta).
+    * `first_mod`: Use this to specify the mod that must be loaded before any other mod.
+    * `last_mod`: Use this to specify the mod that must be loaded after all other mods
     * `allowed_mapgens = <comma-separated mapgens>`
       e.g. `allowed_mapgens = v5,v6,flat`
       Mapgens not in this list are removed from the list of mapgens for the
@@ -453,6 +456,10 @@ i.e. without gamma-correction.
 ### Texture overlaying
 
 Textures can be overlaid by putting a `^` between them.
+
+Warning: If the lower and upper pixels are both semi-transparent, this operation
+does *not* do alpha blending, and it is *not* associative. Otherwise it does
+alpha blending in srgb color space.
 
 Example:
 
@@ -1497,7 +1504,7 @@ Look for examples in `games/devtest` or `games/minetest_game`.
     * For supported model formats see Irrlicht engine documentation.
 * `plantlike_rooted`
     * Enables underwater `plantlike` without air bubbles around the nodes.
-    * Consists of a base cube at the co-ordinates of the node plus a
+    * Consists of a base cube at the coordinates of the node plus a
       `plantlike` extension above
     * If `paramtype2="leveled", the `plantlike` extension has a height
       of `param2 / 16` nodes, otherwise it's the height of 1 node
@@ -2350,8 +2357,11 @@ for this group, and unable to dig the rating `1`, which is the toughest.
 Unless there is a matching group that enables digging otherwise.
 
 If the result digging time is 0, a delay of 0.15 seconds is added between
-digging nodes; If the player releases LMB after digging, this delay is set to 0,
+digging nodes. If the player releases LMB after digging, this delay is set to 0,
 i.e. players can more quickly click the nodes away instead of holding LMB.
+
+This extra delay is not applied in case of a digging time between 0 and 0.15,
+so a digging time of 0.01 is actually faster than a digging time of 0.
 
 ### Damage groups
 
@@ -3068,7 +3078,7 @@ Elements
 ### `textlist[<X>,<Y>;<W>,<H>;<name>;<listelem 1>,<listelem 2>,...,<listelem n>]`
 
 * Scrollable item list showing arbitrary text elements
-* `name` fieldname sent to server on doubleclick value is current selected
+* `name` fieldname sent to server on double-click value is current selected
   element.
 * `listelements` can be prepended by #color in hexadecimal format RRGGBB
   (only).
@@ -3077,7 +3087,7 @@ Elements
 ### `textlist[<X>,<Y>;<W>,<H>;<name>;<listelem 1>,<listelem 2>,...,<listelem n>;<selected idx>;<transparent>]`
 
 * Scrollable itemlist showing arbitrary text elements
-* `name` fieldname sent to server on doubleclick value is current selected
+* `name` fieldname sent to server on double-click value is current selected
   element.
 * `listelements` can be prepended by #RRGGBB (only) in hexadecimal format
     * if you want a listelement to start with "#" write "##"
@@ -3214,7 +3224,7 @@ Elements
 
 * Show scrollable table using options defined by the previous `tableoptions[]`
 * Displays cells as defined by the previous `tablecolumns[]`
-* `name`: fieldname sent to server on row select or doubleclick
+* `name`: fieldname sent to server on row select or double-click
 * `cell 1`...`cell n`: cell contents given in row-major order
 * `selected idx`: index of row to be selected within table (first row = `1`)
 * See also `minetest.explode_table_event`
@@ -3243,7 +3253,7 @@ Elements
 * Types: `text`, `image`, `color`, `indent`, `tree`
     * `text`:   show cell contents as text
     * `image`:  cell contents are an image index, use column options to define
-                images.
+                images. images are scaled down to fit the row height if necessary.
     * `color`:  cell contents are a ColorString and define color of following
                 cell.
     * `indent`: cell contents are a number and define indentation of following
@@ -3264,7 +3274,7 @@ Elements
         * `0=<value>` sets image for image index 0
         * `1=<value>` sets image for image index 1
         * `2=<value>` sets image for image index 2
-        * and so on; defined indices need not be contiguous empty or
+        * and so on; defined indices need not be contiguous. empty or
           non-numeric cells are treated as `0`.
     * `color` column options:
         * `span=<value>`: number of following columns to affect
@@ -3535,10 +3545,12 @@ Markup language used in `hypertext[]` elements uses tags that look like HTML tag
 The markup language is currently unstable and subject to change. Use with caution.
 Some tags can enclose text, they open with `<tagname>` and close with `</tagname>`.
 Tags can have attributes, in that case, attributes are in the opening tag in
-form of a key/value separated with equal signs. Attribute values should not be quoted.
+form of a key/value separated with equal signs.
+Attribute values should be quoted using either " or '.
 
-If you want to insert a literal greater-than sign or a backslash into the text,
-you must escape it by preceding it with a backslash.
+If you want to insert a literal greater-than, less-than, or a backslash into the text,
+you must escape it by preceding it with a backslash. In a quoted attribute value, you
+can insert a literal quote mark by preceding it with a backslash.
 
 These are the technically basic tags but see below for usual tags. Base tags are:
 
@@ -3898,6 +3910,7 @@ Operators
 ---------
 
 Operators can be used if all of the involved vectors have metatables:
+
 * `v1 == v2`:
     * Returns whether `v1` and `v2` are identical.
 * `-v`:
@@ -4003,8 +4016,9 @@ Helper functions
     * X1, Y1, ... Z2 are coordinates
     * `relative_to`: Optional. If set to a position, each coordinate
       can use the tilde notation for relative positions
-    * Tilde notation: "~": Relative coordinate
-                      "~<number>": Relative coordinate plus <number>
+    * Tilde notation
+      * `"~"`: Relative coordinate
+      * `"~<number>"`: Relative coordinate plus `<number>`
     * Example: `minetest.string_to_area("(1,2,3) (~5,~-5,~)", {x=10,y=10,z=10})`
       returns `{x=1,y=2,z=3}, {x=15,y=5,z=10}`
 * `minetest.formspec_escape(string)`: returns a string
@@ -4075,9 +4089,9 @@ Translations
 Texts can be translated client-side with the help of `minetest.translate` and
 translation files.
 
-Consider using the script `util/mod_translation_updater.py` in the Minetest
-repository to generate and update translation files automatically from the Lua
-sources. See `util/README_mod_translation_updater.md` for an explanation.
+Consider using the script `mod_translation_updater.py` in the Minetest
+[modtools](https://github.com/minetest/modtools) repository to generate and
+update translation files automatically from the Lua sources.
 
 Translating a string
 --------------------
@@ -4241,7 +4255,7 @@ Perlin noise
 ============
 
 Perlin noise creates a continuously-varying value depending on the input values.
-Usually in Minetest the input values are either 2D or 3D co-ordinates in nodes.
+Usually in Minetest the input values are either 2D or 3D coordinates in nodes.
 The result is used during map generation to create the terrain shape, vary heat
 and humidity to distribute biomes, vary the density of decorations or vary the
 structure of ores.
@@ -4341,6 +4355,8 @@ A common medium value is 0.5, such that each octave has half the amplitude of
 the previous octave.
 This may need to be tuned when altering `lacunarity`; when doing so consider
 that a common medium value is 1 / lacunarity.
+
+Instead of `persistence`, the key `persist` may be used to the same effect.
 
 ### `lacunarity`
 
@@ -4502,7 +4518,7 @@ computationally expensive than any other ore.
 Creates a single undulating ore stratum that is continuous across mapchunk
 borders and horizontally spans the world.
 
-The 2D perlin noise described by `noise_params` defines the Y co-ordinate of
+The 2D perlin noise described by `noise_params` defines the Y coordinate of
 the stratum midpoint. The 2D perlin noise described by `np_stratum_thickness`
 defines the stratum's vertical thickness (in units of nodes). Due to being
 continuous across mapchunk borders the stratum's vertical thickness is
@@ -5124,6 +5140,9 @@ Collision info passed to `on_step` (`moveresult` argument):
             axis = string, -- "x", "y" or "z"
             node_pos = vector, -- if type is "node"
             object = ObjectRef, -- if type is "object"
+            -- The position of the entity when the collision occurred.
+            -- Available since feature "moveresult_new_pos".
+            new_pos = vector,
             old_velocity = vector,
             new_velocity = vector,
         },
@@ -5432,11 +5451,15 @@ Utilities
       dynamic_add_media_filepath = true,
        -- L-system decoration type (5.9.0)
       lsystem_decoration_type = true,
-      -- Overrideable pointing range using the itemstack meta key `"range"` (5.9.0)
+      -- Overridable pointing range using the itemstack meta key `"range"` (5.9.0)
       item_meta_range = true,
       -- Allow passing an optional "actor" ObjectRef to the following functions:
       -- minetest.place_node, minetest.dig_node, minetest.punch_node (5.9.0)
       node_interaction_actor = true,
+      -- "new_pos" field in entity moveresult (5.9.0)
+      moveresult_new_pos = true,
+      -- Allow removing definition fields in `minetest.override_item` (5.9.0)
+      override_item_remove_fields = true,
   }
   ```
 
@@ -5606,11 +5629,17 @@ Call these functions only at load time!
 * `minetest.register_node(name, node definition)`
 * `minetest.register_craftitem(name, item definition)`
 * `minetest.register_tool(name, item definition)`
-* `minetest.override_item(name, redefinition)`
+* `minetest.override_item(name, redefinition, del_fields)`
+    * `redefinition` is a table of fields `[name] = new_value`,
+      overwriting fields of or adding fields to the existing definition.
+    * `del_fields` is a list of field names to be set
+      to `nil` ("deleted from") the original definition.
     * Overrides fields of an item registered with register_node/tool/craftitem.
     * Note: Item must already be defined, (opt)depend on the mod defining it.
     * Example: `minetest.override_item("default:mese",
-      {light_source=minetest.LIGHT_MAX})`
+      {light_source=minetest.LIGHT_MAX}, {"sounds"})`:
+      Overwrites the `light_source` field,
+      removes the sounds from the definition of the mese block.
 * `minetest.unregister_item(name)`
     * Unregisters the item from the engine, and deletes the entry with key
       `name` from `minetest.registered_items` and from the associated item table
@@ -5697,12 +5726,15 @@ Global callback registration functions
 Call these functions only at load time!
 
 * `minetest.register_globalstep(function(dtime))`
-    * Called every server step, usually interval of 0.1s
+    * Called every server step, usually interval of 0.1s.
+	* `dtime` is the time since last execution in seconds.
 * `minetest.register_on_mods_loaded(function())`
     * Called after mods have finished loading and before the media is cached or the
       aliases handled.
 * `minetest.register_on_shutdown(function())`
     * Called before server shutdown
+    * Players that were kicked by the shutdown procedure are still fully accessible
+     in `minetest.get_connected_players()`.
     * **Warning**: If the server terminates abnormally (i.e. crashes), the
       registered callbacks **will likely not be run**. Data should be saved at
       semi-frequent intervals as well as on server shutdown.
@@ -5721,7 +5753,7 @@ Call these functions only at load time!
 * `minetest.register_on_generated(function(minp, maxp, blockseed))`
     * Called after generating a piece of world between `minp` and `maxp`.
     * **Avoid using this** whenever possible. As with other callbacks this blocks
-      the main thread and introduces noticable latency.
+      the main thread and introduces noticeable latency.
       Consider [Mapgen environment] for an alternative.
 * `minetest.register_on_newplayer(function(ObjectRef))`
     * Called when a new player enters the world for the first time
@@ -5729,7 +5761,7 @@ Call these functions only at load time!
     * Called when a player is punched
     * Note: This callback is invoked even if the punched player is dead.
     * `player`: ObjectRef - Player that was punched
-    * `hitter`: ObjectRef - Player that hit
+    * `hitter`: ObjectRef - Player that hit. Can be nil.
     * `time_from_last_punch`: Meant for disallowing spamming of clicks
       (can be nil).
     * `tool_capabilities`: Capability table of used item (can be nil)
@@ -5779,6 +5811,7 @@ Call these functions only at load time!
     * `last_login`: The timestamp of the previous login, or nil if player is new
 * `minetest.register_on_leaveplayer(function(ObjectRef, timed_out))`
     * Called when a player leaves the game
+    * Does not get executed for connected players on shutdown.
     * `timed_out`: True for timeout, false for other reasons.
 * `minetest.register_on_authplayer(function(name, ip, is_success))`
     * Called when a client attempts to log into an account.
@@ -5808,8 +5841,8 @@ Call these functions only at load time!
     * Return `true` to mark the command as handled, which means that the default
       handlers will be prevented.
 * `minetest.register_on_player_receive_fields(function(player, formname, fields))`
-    * Called when the server received input from `player` in a formspec with
-      the given `formname`. Specifically, this is called on any of the
+    * Called when the server received input from `player`.
+      Specifically, this is called on any of the
       following events:
           * a button was pressed,
           * Enter was pressed while the focus was on a text field
@@ -5820,6 +5853,9 @@ Call these functions only at load time!
           * an entry was double-clicked in a textlist or table,
           * a scrollbar was moved, or
           * the form was actively closed by the player.
+    * `formname` is the name passed to `minetest.show_formspec`.
+      Special case: The empty string refers to the player inventory
+      (the formspec set by the `set_inventory_formspec` player method).
     * Fields are sent for formspec elements which define a field. `fields`
       is a table containing each formspecs element value (as string), with
       the `name` parameter as index for each. The value depends on the
@@ -6102,12 +6138,24 @@ Environment access
     * Items can be added also to unloaded and non-generated blocks.
 * `minetest.get_player_by_name(name)`: Get an `ObjectRef` to a player
     * Returns nothing in case of error (player offline, doesn't exist, ...).
-* `minetest.get_objects_inside_radius(pos, radius)`
-    * returns a list of ObjectRefs.
+* `minetest.get_objects_inside_radius(center, radius)`
+    * returns a list of ObjectRefs
     * `radius`: using a Euclidean metric
-* `minetest.get_objects_in_area(pos1, pos2)`
-    * returns a list of ObjectRefs.
-    * `pos1` and `pos2` are the min and max positions of the area to search.
+    * **Warning**: Any kind of interaction with the environment or other APIs
+      can cause later objects in the list to become invalid while you're iterating it.
+      (e.g. punching an entity removes its children)
+      It is recommended to use `minetest.objects_inside_radius` instead, which
+      transparently takes care of this possibility.
+* `minetest.objects_inside_radius(center, radius)`
+    * returns an iterator of valid objects
+    * example: `for obj in minetest.objects_inside_radius(center, radius) do obj:punch(...) end`
+* `minetest.get_objects_in_area(min_pos, max_pos)`
+    * returns a list of ObjectRefs
+    * `min_pos` and `max_pos` are the min and max positions of the area to search
+    * **Warning**: The same warning as for `minetest.get_objects_inside_radius` applies.
+      Use `minetest.objects_in_area` instead to iterate only valid objects.
+* `minetest.objects_in_area(min_pos, max_pos)`
+	* returns an iterator of valid objects
 * `minetest.set_timeofday(val)`: set time of day
     * `val` is between `0` and `1`; `0` for midnight, `0.5` for midday
 * `minetest.get_timeofday()`: get time of day
@@ -6369,11 +6417,11 @@ Environment access
     * spread these updates to neighbors and can cause a cascade
       of nodes to fall.
 * `minetest.get_spawn_level(x, z)`
-    * Returns a player spawn y co-ordinate for the provided (x, z)
-      co-ordinates, or `nil` for an unsuitable spawn point.
+    * Returns a player spawn y coordinate for the provided (x, z)
+      coordinates, or `nil` for an unsuitable spawn point.
     * For most mapgens a 'suitable spawn point' is one with y between
       `water_level` and `water_level + 16`, and in mgv7 well away from rivers,
-      so `nil` will be returned for many (x, z) co-ordinates.
+      so `nil` will be returned for many (x, z) coordinates.
     * The spawn level returned is for a player spawn in unmodified terrain.
     * The spawn level is intentionally above terrain level to cope with
       full-node biome 'dust' nodes.
@@ -6418,7 +6466,8 @@ Formspec
 * `minetest.show_formspec(playername, formname, formspec)`
     * `playername`: name of player to show formspec
     * `formname`: name passed to `on_player_receive_fields` callbacks.
-      It should follow the `"modname:<whatever>"` naming convention
+      It should follow the `"modname:<whatever>"` naming convention.
+      `formname` must not be empty.
     * `formspec`: formspec to display
 * `minetest.close_formspec(playername, formname)`
     * `playername`: name of player to close formspec
@@ -6682,7 +6731,7 @@ This allows you easy interoperability for delegating work to jobs.
     * Register a path to a Lua file to be imported when an async environment
       is initialized. You can use this to preload code which you can then call
       later using `minetest.handle_async()`.
-* `minetest.register_async_metatable(name, mt)`:
+* `minetest.register_portable_metatable(name, mt)`:
     * Register a metatable that should be preserved when data is transferred
     between the main thread and the async environment.
     * `name` is a string that identifies the metatable. It is recommended to
@@ -6698,6 +6747,7 @@ This allows you easy interoperability for delegating work to jobs.
 ### List of APIs available in an async environment
 
 Classes:
+
 * `AreaStore`
 * `ItemStack`
 * `PerlinNoise`
@@ -6711,17 +6761,20 @@ Classes:
 * `Settings`
 
 Class instances that can be transferred between environments:
+
 * `ItemStack`
 * `PerlinNoise`
 * `PerlinNoiseMap`
 * `VoxelManip`
 
 Functions:
+
 * Standalone helpers such as logging, filesystem, encoding,
   hashing or compression APIs
-* `minetest.register_async_metatable` (see above)
+* `minetest.register_portable_metatable` (see above)
 
 Variables:
+
 * `minetest.settings`
 * `minetest.registered_items`, `registered_nodes`, `registered_tools`,
   `registered_craftitems` and `registered_aliases`
@@ -6773,6 +6826,7 @@ does not have a global step or timer.
 ### List of APIs available in the mapgen env
 
 Classes:
+
 * `AreaStore`
 * `ItemStack`
 * `PerlinNoise`
@@ -6786,6 +6840,7 @@ Classes:
 * `Settings`
 
 Functions:
+
 * Standalone helpers such as logging, filesystem, encoding,
   hashing or compression APIs
 * `minetest.get_biome_id`, `get_biome_name`, `get_heat`, `get_humidity`,
@@ -6796,6 +6851,7 @@ Functions:
     * these only operate on the current chunk (if inside a callback)
 
 Variables:
+
 * `minetest.settings`
 * `minetest.registered_items`, `registered_nodes`, `registered_tools`,
   `registered_craftitems` and `registered_aliases`
@@ -6845,7 +6901,7 @@ Server
                        all players (optional)
         * `ephemeral`: boolean that marks the media as ephemeral,
                        it will not be cached on the client (optional, default false)
-        * Exactly one of the paramters marked [*] must be specified.
+        * Exactly one of the parameters marked [*] must be specified.
     * `callback`: function with arguments `name`, which is a player name
     * Pushes the specified media file to client(s). (details below)
       The file must be a supported image, sound or model format.
@@ -7527,9 +7583,12 @@ an itemstring, a table or `nil`.
 * `set_wear(wear)`: returns boolean indicating whether item was cleared
     * `wear`: number, unsigned 16 bit integer
 * `get_meta()`: returns ItemStackMetaRef. See section for more details
-* `get_metadata()`: (DEPRECATED) Returns metadata (a string attached to an item
-  stack).
-* `set_metadata(metadata)`: (DEPRECATED) Returns true.
+* `get_metadata()`: **Deprecated.** Returns metadata (a string attached to an item stack).
+    * If you need to access this to maintain backwards compatibility,
+      use `stack:get_meta():get_string("")` instead.
+* `set_metadata(metadata)`: **Deprecated.** Returns true.
+    * If you need to set this to maintain backwards compatibility,
+      use `stack:get_meta():set_string("", metadata)` instead.
 * `get_description()`: returns the description shown in inventory list tooltips.
     * The engine uses this when showing item descriptions in tooltips.
     * Fields for finding the description, in order:
@@ -7673,7 +7732,7 @@ metadata_table = {
     -- metadata fields (key/value store)
     fields = {
         infotext = "Container",
-        anoter_key = "Another Value",
+        another_key = "Another Value",
     },
 
     -- inventory data (for nodes)
@@ -7768,12 +7827,17 @@ When you receive an `ObjectRef` as a callback argument or from another API
 function, it is possible to store the reference somewhere and keep it around.
 It will keep functioning until the object is unloaded or removed.
 
-However, doing this is **NOT** recommended as there is (intentionally) no method
-to test if a previously acquired `ObjectRef` is still valid.
-Instead, `ObjectRefs` should be "let go" of as soon as control is returned from
-Lua back to the engine.
+However, doing this is **NOT** recommended - `ObjectRefs` should be "let go"
+of as soon as control is returned from Lua back to the engine.
+
 Doing so is much less error-prone and you will never need to wonder if the
 object you are working with still exists.
+
+If this is not feasible, you can test whether an `ObjectRef` is still valid
+via `object:is_valid()`.
+
+Getters may be called for invalid objects and will return nothing then.
+All other methods should not be called on invalid objects.
 
 ### Attachments
 
@@ -7793,6 +7857,8 @@ child will follow movement and rotation of that bone.
 
 ### Methods
 
+* `is_valid()`: returns whether the object is valid.
+   * See "Advice on handling `ObjectRefs`" above.
 * `get_pos()`: returns position as vector `{x=num, y=num, z=num}`
 * `set_pos(pos)`:
     * Sets the position of the object.
@@ -7825,11 +7891,11 @@ child will follow movement and rotation of that bone.
     * no-op if object is attached
 * `punch(puncher, time_from_last_punch, tool_capabilities, dir)`
     * punches the object, triggering all consequences a normal punch would have
-    * `puncher`: another `ObjectRef` which punched the object
+    * `puncher`: another `ObjectRef` which punched the object or `nil`
     * `dir`: direction vector of punch
     * Other arguments: See `on_punch` for entities
-    * All arguments except `puncher` can be `nil`, in which case a default
-      value will be used
+    * Arguments `time_from_last_punch`, `tool_capabilities`, and `dir`
+      will be replaced with a default value when the caller sets them to `nil`.
 * `right_click(clicker)`:
     * simulates using the 'place/use' key on the object
     * triggers all consequences as if a real player had done this
@@ -7966,7 +8032,7 @@ child will follow movement and rotation of that bone.
     * `rot` is a vector (radians). X is pitch (elevation), Y is yaw (heading)
       and Z is roll (bank).
     * Does not reset rotation incurred through `automatic_rotate`.
-      Remove & readd your objects to force a certain rotation.
+      Remove & re-add your objects to force a certain rotation.
 * `get_rotation()`: returns the rotation, a vector (radians)
 * `set_yaw(yaw)`: sets the yaw in radians (heading).
 * `get_yaw()`: returns number in radians
@@ -8204,7 +8270,11 @@ child will follow movement and rotation of that bone.
             * `"plain"`: Uses 0 textures, `base_color` used as both fog and sky.
             (default: `"regular"`)
         * `textures`: A table containing up to six textures in the following
-            order: Y+ (top), Y- (bottom), X- (west), X+ (east), Z+ (north), Z- (south).
+            order: Y+ (top), Y- (bottom), X+ (east), X- (west), Z- (south), Z+ (north).
+            The top and bottom textures are oriented in-line with the east (X+) face (the top edge of the
+            bottom texture and the bottom edge of the top texture touch the east face).
+            Some top and bottom textures expect to be aligned with the north face and will need to be rotated
+            by -90 and 90 degrees, respectively, to fit the eastward orientation.
         * `clouds`: Boolean for whether clouds appear. (default: `true`)
         * `sky_color`: A table used in `"regular"` type only, containing the
           following values (alpha is ignored):
@@ -9660,6 +9730,7 @@ Used by `minetest.register_node`.
 
     on_receive_fields = function(pos, formname, fields, sender),
     -- fields = {name1 = value1, name2 = value2, ...}
+    -- formname should be the empty string; you **must not** use formname.
     -- Called when an UI form (e.g. sign text input) returns data.
     -- See minetest.register_on_player_receive_fields for more info.
     -- default: nil
@@ -10284,7 +10355,7 @@ See [Decoration types]. Used by `minetest.register_decoration`.
     y_min = -31000,
     y_max = 31000,
     -- Lower and upper limits for decoration (inclusive).
-    -- These parameters refer to the Y co-ordinate of the 'place_on' node.
+    -- These parameters refer to the Y coordinate of the 'place_on' node.
 
     spawn_by = "default:water",
     -- Node (or list of nodes) that the decoration only spawns next to.
@@ -10614,7 +10685,10 @@ Used by `minetest.add_particle`.
     texture = "image.png",
     -- The texture of the particle
     -- v5.6.0 and later: also supports the table format described in the
-    -- following section
+    -- following section, but due to a bug this did not take effect
+    -- (beyond the texture name).
+    -- v5.9.0 and later: fixes the bug.
+    -- Note: "texture.animation" is ignored here. Use "animation" below instead.
 
     playername = "singleplayer",
     -- Optional, if specified spawns particle only on the player's client
@@ -10639,6 +10713,11 @@ Used by `minetest.add_particle`.
 
     drag = {x=0, y=0, z=0},
     -- v5.6.0 and later: Optional drag value, consult the following section
+    -- Note: Only a vector is supported here. Alternative forms like a single
+    -- number are not supported.
+
+    jitter = {min = ..., max = ..., bias = 0},
+    -- v5.6.0 and later: Optional jitter range, consult the following section
 
     bounce = {min = ..., max = ..., bias = 0},
     -- v5.6.0 and later: Optional bounce range, consult the following section
@@ -10664,7 +10743,10 @@ will be ignored.
 
 ```lua
 {
-    -- Common fields (same name and meaning in both new and legacy syntax)
+    -------------------
+    -- Common fields --
+    -------------------
+    -- (same name and meaning in both new and legacy syntax)
 
     amount = 1,
     -- Number of particles spawned over the time period `time`.
@@ -10696,6 +10778,8 @@ will be ignored.
 
     texture = "image.png",
     -- The texture of the particle
+    -- v5.6.0 and later: also supports the table format described in the
+    -- following section.
 
     playername = "singleplayer",
     -- Optional, if specified spawns particles only on the player's client
@@ -10721,7 +10805,9 @@ will be ignored.
     -- particle texture is picked.
     -- Otherwise, the default behavior is used. (currently: any random tile)
 
-    -- Legacy definition fields
+    -------------------
+    -- Legacy fields --
+    -------------------
 
     minpos = {x=0, y=0, z=0},
     maxpos = {x=0, y=0, z=0},
@@ -10849,32 +10935,46 @@ All of the properties that can be defined in this way are listed in the next
 section, along with the datatypes they accept.
 
 #### List of particlespawner properties
-All of the properties in this list can be animated with `*_tween` tables
-unless otherwise specified. For example, `jitter` can be tweened by setting
-a `jitter_tween` table instead of (or in addition to) a `jitter` table/value.
+
+All properties in this list of type "vec3 range", "float range" or "vec3" can
+be animated with `*_tween` tables. For example, `jitter` can be tweened by
+setting a `jitter_tween` table instead of (or in addition to) a `jitter`
+table/value.
+
 In this section, a float range is a table defined as so: { min = A, max = B }
 A and B are your supplemented values. For a vec3 range this means they are vectors.
 Types used are defined in the previous section.
 
 * vec3 range `pos`: the position at which particles can appear
+
 * vec3 range `vel`: the initial velocity of the particle
+
 * vec3 range `acc`: the direction and speed with which the particle
   accelerates
+
+* vec3 range `size`: scales the visual size of the particle texture.
+  if `node` is set, this can be set to 0 to spawn randomly-sized particles
+  (just like actual node dig particles).
+
 * vec3 range `jitter`: offsets the velocity of each particle by a random
   amount within the specified range each frame. used to create Brownian motion.
+
 * vec3 range `drag`: the amount by which absolute particle velocity along
   each axis is decreased per second.  a value of 1.0 means that the particle
   will be slowed to a stop over the space of a second; a value of -1.0 means
   that the particle speed will be doubled every second. to avoid interfering
   with gravity provided by `acc`, a drag vector like `vector.new(1,0,1)` can
   be used instead of a uniform value.
+
 * float range `bounce`: how bouncy the particles are when `collisiondetection`
   is turned on. values less than or equal to `0` turn off particle bounce;
   `1` makes the particles bounce without losing any velocity, and `2` makes
   them double their velocity with every bounce.  `bounce` is not bounded but
   values much larger than `1.0` probably aren't very useful.
+
 * float range `exptime`: the number of seconds after which the particle
   disappears.
+
 * table `attract`: sets the birth orientation of particles relative to various
   shapes defined in world coordinate space. this is an alternative means of
   setting the velocity which allows particles to emerge from or enter into
@@ -10882,8 +10982,10 @@ Types used are defined in the previous section.
   velocity values within a range. the velocity calculated by this method will
   be **added** to that specified by `vel` if `vel` is also set, so in most
   cases **`vel` should be set to 0**. `attract` has the fields:
+
   * string `kind`: selects the kind of shape towards which the particles will
     be oriented. it must have one of the following values:
+
     * `"none"`: no attractor is set and the `attractor` table is ignored
     * `"point"`: the particles are attracted to a specific point in space.
       use this also if you want a sphere-like effect, in combination with
@@ -10894,25 +10996,32 @@ Types used are defined in the previous section.
     * `"plane"`: the particles are attracted to an (infinite) plane on whose
       surface `origin` designates a point in world coordinate space. use this
       for e.g. particles entering or emerging from a portal.
+
   * float range `strength`: the speed with which particles will move towards
     `attractor`. If negative, the particles will instead move away from that
     point.
+
   * vec3 `origin`: the origin point of the shape towards which particles will
     initially be oriented. functions as an offset if `origin_attached` is also
     set.
+
   * vec3 `direction`: sets the direction in which the attractor shape faces. for
     lines, this sets the angle of the line; e.g. a vector of (0,1,0) will
     create a vertical line that passes through `origin`. for planes, `direction`
     is the surface normal of an infinite plane on whose surface `origin` is
     a point. functions as an offset if `direction_attached` is also set.
-  * entity `origin_attached`: allows the origin to be specified as an offset
+
+  * ObjectRef `origin_attached`: allows the origin to be specified as an offset
     from the position of an entity rather than a coordinate in world space.
-  * entity `direction_attached`: allows the direction to be specified as an offset
-    from the position of an entity rather than a coordinate in world space.
+
+  * ObjectRef `direction_attached`: allows the direction to be specified as an
+    offset from the position of an entity rather than a coordinate in world space.
+
   * bool `die_on_contact`: if true, the particles' lifetimes are adjusted so
     that they will die as they cross the attractor threshold. this behavior
     is the default but is undesirable for some kinds of animations; set it to
     false to allow particles to live out their natural lives.
+
 * vec3 range `radius`: if set, particles will be arranged in a sphere around
   `pos`. A constant can be used to create a spherical shell of particles, a
   vector to create an ovoid shell, and a range to create a volume; e.g.
@@ -10924,9 +11033,10 @@ Types used are defined in the previous section.
 
 ### Textures
 
-In versions before v5.6.0, particlespawner textures could only be specified as a single
-texture string. After v5.6.0, textures can now be specified as a table as well. This
-table contains options that allow simple animations to be applied to the texture.
+In versions before v5.6.0, particle/particlespawner textures could only be
+specified as a single texture string. After v5.6.0, textures can now be
+specified as a table as well. This table contains options that allow simple
+animations to be applied to the texture.
 
 ```lua
 texture = {
@@ -10981,18 +11091,18 @@ texture = {
 }
 ```
 
-Instead of setting a single texture definition, it is also possible to set a
-`texpool` property. A `texpool` consists of a list of possible particle textures.
-Every time a particle is spawned, the engine will pick a texture at random from
-the `texpool` and assign it as that particle's texture. You can also specify a
-`texture` in addition to a `texpool`; the `texture` value will be ignored on newer
-clients but will be sent to older (pre-v5.6.0) clients that do not implement
-texpools.
+For particlespawners, it is also possible to set the `texpool` property instead
+of a single texture definition. A `texpool` consists of a list of possible
+particle textures. Every time a particle is spawned, the engine will pick a
+texture at random from the `texpool` and assign it as that particle's texture.
+You can also specify a `texture` in addition to a `texpool`; the `texture`
+value will be ignored on newer clients but will be sent to older (pre-v5.6.0)
+clients that do not implement texpools.
 
 ```lua
 texpool = {
     "mymod_particle_texture.png";
-    { name = "mymod_spark.png", fade = "out" },
+    { name = "mymod_spark.png", alpha_tween = {1, 0} },
     {
       name = "mymod_dust.png",
       alpha = 0.3,

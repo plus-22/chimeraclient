@@ -302,7 +302,8 @@ void Game::run()
 			g_settings->getU16("screen_w"),
 			g_settings->getU16("screen_h")
 		);
-	const bool initial_window_maximized = g_settings->getBool("window_maximized");
+	const bool initial_window_maximized = !g_settings->getBool("fullscreen") &&
+			g_settings->getBool("window_maximized");
 
 	while (m_rendering_engine->run()
 			&& !(*kill || g_gamecallback->shutdown_requested
@@ -1661,9 +1662,6 @@ void Game::toggleBlockBounds()
 			break;
 		case Hud::BLOCK_BOUNDS_NEAR:
 			m_game_ui->showTranslatedStatusText("Block bounds shown for nearby blocks");
-			break;
-		case Hud::BLOCK_BOUNDS_MAX:
-			m_game_ui->showTranslatedStatusText("Block bounds shown for all blocks");
 			break;
 		default:
 			break;
@@ -3230,8 +3228,12 @@ void Game::handleDigging(const PointedThing &pointed, const v3s16 &nodepos,
 		runData.nodig_delay_timer =
 				runData.dig_time_complete / (float)crack_animation_length;
 
-		// Don't add a corresponding delay to very time consuming nodes.
-		runData.nodig_delay_timer = std::min(runData.nodig_delay_timer, 0.3f);
+		// We don't want a corresponding delay to very time consuming nodes
+		// and nodes without digging time (e.g. torches) get a fixed delay.
+		if (runData.nodig_delay_timer > 0.3f)
+			runData.nodig_delay_timer = 0.3f;
+		else if (runData.dig_instantly)
+			runData.nodig_delay_timer = 0.15f;
 
 		// Ensure that the delay between breaking nodes
 		// (dig_time_complete + nodig_delay_timer) is at least the
@@ -3669,8 +3671,8 @@ void Game::readSettings()
 	m_cache_enable_fog                   = g_settings->getBool("enable_fog");
 	m_cache_mouse_sensitivity            = g_settings->getFloat("mouse_sensitivity", 0.001f, 10.0f);
 	m_cache_joystick_frustum_sensitivity = std::max(g_settings->getFloat("joystick_frustum_sensitivity"), 0.001f);
-	m_repeat_place_time                  = g_settings->getFloat("repeat_place_time", 0.15f, 2.0f);
-	m_repeat_dig_time                    = g_settings->getFloat("repeat_dig_time", 0.15f, 2.0f);
+	m_repeat_place_time                  = g_settings->getFloat("repeat_place_time", 0.16f, 2.0f);
+	m_repeat_dig_time                    = g_settings->getFloat("repeat_dig_time", 0.0f, 2.0f);
 
 	m_cache_enable_noclip                = g_settings->getBool("noclip");
 	m_cache_enable_free_move             = g_settings->getBool("free_move");

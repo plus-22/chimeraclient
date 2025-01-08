@@ -60,6 +60,7 @@ Hud::Hud(Client *client, LocalPlayer *player,
 	this->inventory   = inventory;
 
 	readScalingSetting();
+	g_settings->registerChangedCallback("dpi_change_notifier", setting_changed_callback, this);
 	g_settings->registerChangedCallback("hud_scaling", setting_changed_callback, this);
 
 	for (auto &hbar_color : hbar_colors)
@@ -153,6 +154,7 @@ void Hud::readScalingSetting()
 
 Hud::~Hud()
 {
+	g_settings->deregisterChangedCallback("dpi_change_notifier", setting_changed_callback, this);
 	g_settings->deregisterChangedCallback("hud_scaling", setting_changed_callback, this);
 
 	if (m_selection_mesh)
@@ -913,7 +915,7 @@ enum Hud::BlockBoundsMode Hud::toggleBlockBounds()
 {
 	m_block_bounds_mode = static_cast<BlockBoundsMode>(m_block_bounds_mode + 1);
 
-	if (m_block_bounds_mode >= BLOCK_BOUNDS_MAX) {
+	if (m_block_bounds_mode > BLOCK_BOUNDS_NEAR) {
 		m_block_bounds_mode = BLOCK_BOUNDS_OFF;
 	}
 	return m_block_bounds_mode;

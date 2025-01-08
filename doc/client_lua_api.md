@@ -314,7 +314,8 @@ Minetest namespace reference
 Call these functions only at load time!
 
 * `minetest.register_globalstep(function(dtime))`
-    * Called every client environment step, usually interval of 0.1s
+    * Called every client environment step
+	* `dtime` is the time since last execution in seconds.
 * `minetest.register_on_mods_loaded(function())`
     * Called just after mods have finished loading.
 * `minetest.register_on_shutdown(function())`
@@ -884,7 +885,7 @@ It can be created via `Raycast(pos1, pos2, objects, liquids)` or
         "node1",
         "node2"
     },
-    post_effect_color = Color,      -- Color overlayed on the screen when the player is in the node
+    post_effect_color = Color,      -- Color overlaid on the screen when the player is in the node
     leveled = number,               -- Max level for node
     sunlight_propogates = bool,     -- Whether light passes through the block
     light_source = number,          -- Light emitted by the block

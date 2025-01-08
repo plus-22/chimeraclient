@@ -1052,14 +1052,15 @@ int ModApiMapgen::l_get_gen_notify(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
 
-	EmergeManager *emerge = getServer(L)->getEmergeManager();
+	auto *emerge = getEmergeManager(L);
+
 	push_flags_string(L, flagdesc_gennotify, emerge->gen_notify_on,
 		emerge->gen_notify_on);
 
 	lua_createtable(L, emerge->gen_notify_on_deco_ids.size(), 0);
 	int i = 1;
 	for (u32 id : emerge->gen_notify_on_deco_ids) {
-		lua_pushnumber(L, id);
+		lua_pushinteger(L, id);
 		lua_rawseti(L, -2, i++);
 	}
 
@@ -1353,7 +1354,7 @@ int ModApiMapgen::l_register_ore(lua_State *L)
 	ore->flags          = 0;
 
 	//// Get noise_threshold
-	warn_if_field_exists(L, index, "noise_threshhold",
+	warn_if_field_exists(L, index, "noise_threshhold", "ore " + ore->name,
 		"Deprecated: new name is \"noise_threshold\".");
 
 	float nthresh;
@@ -1363,9 +1364,9 @@ int ModApiMapgen::l_register_ore(lua_State *L)
 	ore->nthresh = nthresh;
 
 	//// Get y_min/y_max
-	warn_if_field_exists(L, index, "height_min",
+	warn_if_field_exists(L, index, "height_min", "ore " + ore->name,
 		"Deprecated: new name is \"y_min\".");
-	warn_if_field_exists(L, index, "height_max",
+	warn_if_field_exists(L, index, "height_max", "ore " + ore->name,
 		"Deprecated: new name is \"y_max\".");
 
 	int ymin, ymax;
@@ -2054,6 +2055,7 @@ void ModApiMapgen::InitializeEmerge(lua_State *L, int top)
 	API_FCT(get_mapgen_setting);
 	API_FCT(get_mapgen_setting_noiseparams);
 	API_FCT(get_noiseparams);
+	API_FCT(get_gen_notify);
 	API_FCT(get_decoration_id);
 	API_FCT(save_gen_notify);
 

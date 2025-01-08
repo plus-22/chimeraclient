@@ -42,6 +42,19 @@ GUIOpenURLMenu::GUIOpenURLMenu(gui::IGUIEnvironment* env,
 {
 }
 
+static std::string maybe_colorize_url(const std::string &url)
+{
+	// Forbid escape codes in URL
+	if (url.find('\x1b') != std::string::npos) {
+		throw std::runtime_error("URL contains escape codes");
+	}
+
+#ifdef HAVE_COLORIZE_URL
+	return colorize_url(url);
+#else
+	return url;
+#endif
+}
 
 void GUIOpenURLMenu::regenerateGui(v2u32 screensize)
 {
@@ -70,16 +83,12 @@ void GUIOpenURLMenu::regenerateGui(v2u32 screensize)
 	*/
 	bool ok = true;
 	std::string text;
-#ifdef USE_CURL
 	try {
-		text = colorize_url(url);
+		text = maybe_colorize_url(url);
 	} catch (const std::exception &e) {
 		text = std::string(e.what()) + " (url = " + url + ")";
 		ok = false;
 	}
-#else
-	text = url;
-#endif
 
 	/*
 		Add stuff
@@ -155,9 +164,7 @@ void GUIOpenURLMenu::drawMenu()
 bool GUIOpenURLMenu::OnEvent(const SEvent &event)
 {
 	if (event.EventType == EET_KEY_INPUT_EVENT) {
-		if ((event.KeyInput.Key == KEY_ESCAPE ||
-				event.KeyInput.Key == KEY_CANCEL) &&
-				event.KeyInput.PressedDown) {
+		if (event.KeyInput.Key == KEY_ESCAPE && event.KeyInput.PressedDown) {
 			quitMenu();
 			return true;
 		}

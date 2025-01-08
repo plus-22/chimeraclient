@@ -64,14 +64,49 @@ local inv_style_fs = [[
 	list[current_player;main;.5,7;8,4]
 ]]
 
+-- Some textures from textures/base/pack and Devtest, with many different sizes
+-- and aspect ratios.
+local image_column = "image,0=logo.png,1=rare_controls.png,2=checkbox_16.png," ..
+		"3=checkbox_32.png,4=checkbox_64.png,5=default_lava.png," ..
+		"6=progress_bar.png,7=progress_bar_bg.png"
+local words = {
+	"esciunt", "repudiandae", "repellat", "voluptatem", "autem", "vitae", "et",
+	"minima", "quasi", "facere", "nihil", "ea", "nemo", "rem", "non", "eos",
+	"laudantium", "eveniet", "veritatis",
+}
+
+local reseed = math.random(2^31-1)
+math.randomseed(1337)
+
+local table_content = {}
+for i = 1, 100 do
+	table.insert(table_content, words[math.random(#words)])
+	table.insert(table_content, words[math.random(#words)])
+	table.insert(table_content, words[math.random(#words)])
+	table.insert(table_content, math.random(0, 7))
+	table.insert(table_content, math.random(0, 7))
+	table.insert(table_content, math.random(0, 7))
+	table.insert(table_content, words[math.random(#words)])
+end
+
+math.randomseed(reseed)
+
+local table_fs = table.concat({
+	"tablecolumns[text,align=left;text,align=right;text,align=center;",
+			image_column, ",align=left;",
+			image_column, ",align=right;",
+			image_column, ",align=center;text,align=right]",
+	"table[0,0;17,12;the_table;", table.concat(table_content, ","), ";1]"
+})
+
 local hypertext_basic = [[A hypertext element
 <bigger>Normal test</bigger>
 This is a normal text.
 
 <bigger><mono>style</mono> test</bigger>
-<style color=#FFFF00>Yellow text.</style> <style color=#FF0000>Red text.</style>
-<style size=24>Size 24.</style> <style size=16>Size 16</style>. <style size=12>Size 12.</style>
-<style font=normal>Normal font.</style> <style font=mono>Mono font.</style>
+<style color="#FFFF00">Yellow text.</style> <style color='#FF0000'>Red text.</style>
+<style size="24">Size 24.</style> <style size=16>Size 16</style>. <style size=12>Size 12.</style>
+<style font="normal">Normal font.</style> <style font=mono>Mono font.</style>
 
 <bigger>Tag test</bigger>
 <normal>normal</normal>
@@ -88,20 +123,20 @@ This is a normal text.
 
 <bigger>Custom tag test</bigger>
 <tag name=t_green color=green>
-<tag name=t_hover hovercolor=yellow>
-<tag name=t_size size=24>
-<tag name=t_mono font=mono>
-<tag name=t_multi color=green font=mono size=24>
+<tag name="t_hover" hovercolor=yellow>
+<tag name="t_size" size=24>
+<tag name="t_mono" font=mono>
+<tag name="t_multi" color=green font=mono size=24>
 <t_green>color=green</t_green>
-Action: <action name=color><t_green>color=green</t_green></action>
-Action: <action name=hovercolor><t_hover>hovercolor=yellow</t_hover></action>
-Action URL: <action name=open url=https://example.com/?a=b#c>open URL</action>
+Action: <action name="color"><t_green>color=green</t_green></action>
+Action: <action name="hovercolor"><t_hover>hovercolor=yellow</t_hover></action>
+Action URL: <action name="open" url="https://example.com/?a=b#c">open URL</action>
 <t_size>size=24</t_size>
 <t_mono>font=mono</t_mono>
 <t_multi>color=green font=mono size=24</t_multi>
 
 <bigger><mono>action</mono> test</bigger>
-<action name=action_test>action</action>
+<action name="action_test">action</action>
 
 <bigger><mono>img</mono> test</bigger>
 Normal:
@@ -350,6 +385,10 @@ local pages = {
 		"label[11,0.5;Noclip]" ..
 		"container[11.5,1]" .. clip_fs:gsub("%%c", "true") .. "container_end[]",
 
+	-- Table
+		"size[18,13]real_coordinates[true]" ..
+		"container[0.5,0.5]" .. table_fs.. "container_end[]",
+
 	-- Hypertext
 		"size[12,13]real_coordinates[true]" ..
 		"container[0.5,0.5]" .. hypertext_fs .. "container_end[]",
@@ -477,7 +516,7 @@ local function show_test_formspec(pname)
 		page = page()
 	end
 
-	local fs = page .. "tabheader[0,0;11,0.65;maintabs;Real Coord,Styles,Noclip,Hypertext,Tabs,Invs,Window,Anim,Model,ScrollC,Sound,Background,Unsized;" .. page_id .. ";false;false]"
+	local fs = page .. "tabheader[0,0;11,0.65;maintabs;Real Coord,Styles,Noclip,Table,Hypertext,Tabs,Invs,Window,Anim,Model,ScrollC,Sound,Background,Unsized;" .. page_id .. ";false;false]"
 
 	minetest.show_formspec(pname, "testformspec:formspec", fs)
 end

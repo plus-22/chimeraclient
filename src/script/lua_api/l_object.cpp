@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "lua_api/l_object.h"
 #include <cmath>
+#include <lua.h>
 #include "lua_api/l_internal.h"
 #include "lua_api/l_inventory.h"
 #include "lua_api/l_item.h"
@@ -106,6 +107,13 @@ int ObjectRef::l_remove(lua_State *L)
 	return 0;
 }
 
+// is_valid(self)
+int ObjectRef::l_is_valid(lua_State *L)
+{
+	lua_pushboolean(L, getobject(checkObject<ObjectRef>(L, 1)) != nullptr);
+	return 1;
+}
+
 // get_pos(self)
 int ObjectRef::l_get_pos(lua_State *L)
 {
@@ -170,16 +178,21 @@ int ObjectRef::l_punch(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
 	ObjectRef *ref = checkObject<ObjectRef>(L, 1);
-	ObjectRef *puncher_ref = checkObject<ObjectRef>(L, 2);
+	ObjectRef *puncher_ref = lua_isnoneornil(L, 2) ? nullptr : checkObject<ObjectRef>(L, 2);
 	ServerActiveObject *sao = getobject(ref);
-	ServerActiveObject *puncher = getobject(puncher_ref);
-	if (sao == nullptr || puncher == nullptr)
+	ServerActiveObject *puncher = puncher_ref ? getobject(puncher_ref) : nullptr;
+	if (sao == nullptr)
 		return 0;
 
 	float time_from_last_punch = readParam<float>(L, 3, 1000000.0f);
 	ToolCapabilities toolcap = read_tool_capabilities(L, 4);
-	v3f dir = readParam<v3f>(L, 5, sao->getBasePosition() - puncher->getBasePosition());
-	dir.normalize();
+	v3f dir;
+	if (puncher) {
+		dir = readParam<v3f>(L, 5, sao->getBasePosition() - puncher->getBasePosition());
+		dir.normalize();
+	} else {
+		dir = readParam<v3f>(L, 5, v3f(0));
+	}
 
 	u32 wear = sao->punch(dir, &toolcap, puncher, time_from_last_punch);
 	lua_pushnumber(L, wear);
@@ -599,7 +612,7 @@ int ObjectRef::l_set_bone_override(lua_State *L)
 		prop.absolute = lua_toboolean(L, -1);
 		lua_pop(L, 1);
 
-		lua_getfield(L, -1, "interpolate");
+		lua_getfield(L, -1, "interpolation");
 		if (lua_isnumber(L, -1))
 			prop.interp_timer = lua_tonumber(L, -1);
 		lua_pop(L, 1);
@@ -650,7 +663,7 @@ static void push_bone_override(lua_State *L, const BoneOverride &props)
 		push_v3f(L, vec);
 		lua_setfield(L, -2, "vec");
 		lua_pushnumber(L, prop.interp_timer);
-		lua_setfield(L, -2, "interpolate");
+		lua_setfield(L, -2, "interpolation");
 		lua_pushboolean(L, prop.absolute);
 		lua_setfield(L, -2, "absolute");
 		lua_setfield(L, -2, name);
@@ -2632,6 +2645,7 @@ const char ObjectRef::className[] = "ObjectRef";
 luaL_Reg ObjectRef::methods[] = {
 	// ServerActiveObject
 	luamethod(ObjectRef, remove),
+	luamethod(ObjectRef, is_valid),
 	luamethod_aliased(ObjectRef, get_pos, getpos),
 	luamethod_aliased(ObjectRef, set_pos, setpos),
 	luamethod(ObjectRef, add_pos),

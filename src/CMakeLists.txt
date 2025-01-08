@@ -27,10 +27,15 @@ mark_as_advanced(
 	CMAKE_CXX_FLAGS_SEMIDEBUG
 	CMAKE_C_FLAGS_SEMIDEBUG
 )
+set(SUPPORTED_BUILD_TYPES None Release Debug SemiDebug RelWithDebInfo MinSizeRel)
 set(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
-	"Choose the type of build. Options are: None Debug SemiDebug RelWithDebInfo MinSizeRel."
+	"Choose the type of build. Options are: ${SUPPORTED_BUILD_TYPES}."
 	FORCE
 )
+if(NOT (CMAKE_BUILD_TYPE IN_LIST SUPPORTED_BUILD_TYPES))
+	message(WARNING
+			"Unknown CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}. Options are: ${SUPPORTED_BUILD_TYPES}.")
+endif()
 
 
 # Set some random things default to not being visible in the GUI
@@ -40,6 +45,25 @@ mark_as_advanced(EXECUTABLE_OUTPUT_PATH LIBRARY_OUTPUT_PATH)
 if(NOT (BUILD_CLIENT OR BUILD_SERVER))
 	message(WARNING "Neither BUILD_CLIENT nor BUILD_SERVER is set! Setting BUILD_SERVER=true")
 	set(BUILD_SERVER TRUE)
+endif()
+
+
+option(PRECOMPILE_HEADERS "Precompile some headers (experimental; requires CMake 3.16 or later)" FALSE)
+set(PRECOMPILED_HEADERS_PATH "" CACHE FILEPATH "Path to a file listing all headers to precompile")
+
+if(PRECOMPILE_HEADERS)
+	if(${CMAKE_VERSION} VERSION_LESS 3.16)
+		message(FATAL_ERROR "PRECOMPILE_HEADERS is on, but precompiled headers require at least CMake 3.16.")
+	endif()
+	if(PRECOMPILED_HEADERS_PATH)
+		set(PRECOMPILED_HEADERS ${PRECOMPILED_HEADERS_PATH})
+	else()
+		set(PRECOMPILED_HEADERS "${CMAKE_SOURCE_DIR}/src/precompiled_headers.txt")
+	endif()
+	message(STATUS "Reading headers to precompile from: ${PRECOMPILED_HEADERS}")
+	# ignore lines that begin with # and empty lines
+	file(STRINGS ${PRECOMPILED_HEADERS} PRECOMPILED_HEADERS_LIST REGEX "^[^#].*$")
+	set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${PRECOMPILED_HEADERS})
 endif()
 
 
@@ -327,6 +351,12 @@ endif()
 include(CheckSymbolExists)
 check_symbol_exists(strlcpy "string.h" HAVE_STRLCPY)
 
+if(UNIX)
+	check_symbol_exists(malloc_trim "malloc.h" HAVE_MALLOC_TRIM)
+else()
+	set(HAVE_MALLOC_TRIM FALSE)
+endif()
+
 check_include_files(endian.h HAVE_ENDIAN_H)
 
 configure_file(
@@ -442,6 +472,10 @@ endif()
 
 if(BUILD_BENCHMARKS)
 	set(common_SRCS ${common_SRCS} ${BENCHMARK_SRCS})
+endif()
+
+if(BUILD_UNITTESTS OR BUILD_BENCHMARKS)
+	set(common_SRCS ${common_SRCS} catch.cpp)
 endif()
 
 # This gives us the icon and file version information
@@ -560,6 +594,7 @@ if(BUILD_CLIENT)
 		${GMP_LIBRARY}
 		${JSON_LIBRARY}
 		${LUA_BIT_LIBRARY}
+		sha256
 		${FREETYPE_LIBRARY}
 		${PLATFORM_LIBS}
 		# on Android, Minetest depends on SDL2 directly
@@ -610,8 +645,12 @@ if(BUILD_CLIENT)
 	if (USE_SPATIAL)
 		target_link_libraries(${PROJECT_NAME} ${SPATIAL_LIBRARY})
 	endif()
-	if(BUILD_BENCHMARKS)
-		target_link_libraries(${PROJECT_NAME} catch2)
+	if(BUILD_UNITTESTS OR BUILD_BENCHMARKS)
+		target_link_libraries(${PROJECT_NAME} Catch2::Catch2)
+	endif()
+
+	if(PRECOMPILE_HEADERS)
+		target_precompile_headers(${PROJECT_NAME} PRIVATE ${PRECOMPILED_HEADERS_LIST})
 	endif()
 endif(BUILD_CLIENT)
 
@@ -632,6 +671,7 @@ if(BUILD_SERVER)
 		${JSON_LIBRARY}
 		${LUA_LIBRARY}
 		${LUA_BIT_LIBRARY}
+		sha256
 		${GMP_LIBRARY}
 		${PLATFORM_LIBS}
 	)
@@ -672,8 +712,12 @@ if(BUILD_SERVER)
 			${CURL_LIBRARY}
 		)
 	endif()
-	if(BUILD_BENCHMARKS)
-		target_link_libraries(${PROJECT_NAME}server catch2)
+	if(BUILD_UNITTESTS OR BUILD_BENCHMARKS)
+		target_link_libraries(${PROJECT_NAME}server Catch2::Catch2)
+	endif()
+
+	if(PRECOMPILE_HEADERS)
+		target_precompile_headers(${PROJECT_NAME}server PRIVATE ${PRECOMPILED_HEADERS_LIST})
 	endif()
 endif(BUILD_SERVER)
 

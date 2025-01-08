@@ -329,27 +329,6 @@ Server::~Server()
 	SendChatMessage(PEER_ID_INEXISTENT, ChatMessage(CHATMESSAGE_TYPE_ANNOUNCE,
 			L"*** Server shutting down"));
 
-	if (m_env) {
-		MutexAutoLock envlock(m_env_mutex);
-
-		infostream << "Server: Saving players" << std::endl;
-		m_env->saveLoadedPlayers();
-
-		infostream << "Server: Kicking players" << std::endl;
-		std::string kick_msg;
-		bool reconnect = false;
-		if (isShutdownRequested()) {
-			reconnect = m_shutdown_state.should_reconnect;
-			kick_msg = m_shutdown_state.message;
-		}
-		if (kick_msg.empty()) {
-			kick_msg = g_settings->get("kick_msg_shutdown");
-		}
-		m_env->saveLoadedPlayers(true);
-		kickAllPlayers(SERVER_ACCESSDENIED_SHUTDOWN,
-			kick_msg, reconnect);
-	}
-
 	actionstream << "Server: Shutting down" << std::endl;
 
 	// Stop server step from happening
@@ -369,16 +348,33 @@ Server::~Server()
 	if (m_env) {
 		MutexAutoLock envlock(m_env_mutex);
 
+		infostream << "Server: Executing shutdown hooks" << std::endl;
 		try {
-			// Empty out the environment, this can also invoke callbacks.
-			m_env->deactivateBlocksAndObjects();
+			m_script->on_shutdown();
 		} catch (ModError &e) {
 			addShutdownError(e);
 		}
 
-		infostream << "Server: Executing shutdown hooks" << std::endl;
+		infostream << "Server: Saving players" << std::endl;
+		m_env->saveLoadedPlayers();
+
+		infostream << "Server: Kicking players" << std::endl;
+		std::string kick_msg;
+		bool reconnect = false;
+		if (isShutdownRequested()) {
+			reconnect = m_shutdown_state.should_reconnect;
+			kick_msg = m_shutdown_state.message;
+		}
+		if (kick_msg.empty()) {
+			kick_msg = g_settings->get("kick_msg_shutdown");
+		}
+		m_env->saveLoadedPlayers(true);
+		kickAllPlayers(SERVER_ACCESSDENIED_SHUTDOWN,
+			kick_msg, reconnect);
+
 		try {
-			m_script->on_shutdown();
+			// Empty out the environment, this can also invoke callbacks.
+			m_env->deactivateBlocksAndObjects();
 		} catch (ModError &e) {
 			addShutdownError(e);
 		}
@@ -2545,9 +2541,7 @@ bool Server::addMediaFile(const std::string &filename,
 
 	// Read data
 	std::string filedata;
-	if (!fs::ReadFile(filepath, filedata)) {
-		errorstream << "Server::addMediaFile(): Failed to open \""
-					<< filename << "\" for reading" << std::endl;
+	if (!fs::ReadFile(filepath, filedata, true)) {
 		return false;
 	}
 
@@ -2715,9 +2709,7 @@ void Server::sendRequestedMedia(session_t peer_id,
 
 		// Read data
 		std::string data;
-		if (!fs::ReadFile(m.path, data)) {
-			errorstream << "Server::sendRequestedMedia(): Failed to read \""
-					<< name << "\"" << std::endl;
+		if (!fs::ReadFile(m.path, data, true)) {
 			continue;
 		}
 		file_size_bunch_total += data.size();
@@ -3618,7 +3610,7 @@ namespace {
 		auto filepath = fs::CreateTempFile();
 		if (filepath.empty())
 			return "";
-		std::ofstream os(filepath, std::ios::binary);
+		auto os = open_ofstream(filepath.c_str(), true);
 		if (!os.good())
 			return "";
 		os << content;
@@ -4200,7 +4192,7 @@ Translations *Server::getTranslationLanguage(const std::string &lang_code)
 	for (const auto &i : m_media) {
 		if (str_ends_with(i.first, suffix)) {
 			std::string data;
-			if (fs::ReadFile(i.second.path, data)) {
+			if (fs::ReadFile(i.second.path, data, true)) {
 				translations->loadTranslation(data);
 			}
 		}
