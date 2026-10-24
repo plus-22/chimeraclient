@@ -7,12 +7,12 @@ A minetest cheat client based off of [OtterClient](https://github.com/otterminet
 This client's name is kind of a joke, as the "Chimera" is a mythological creature made up of many different creatures, just like this client is made up of many clients.
 
 ### Important info:
-This client includes almost all CSM api additions from dragonfire, although it hasn't been documented (yet). It also includes many built-in client side mods and a new minimalistic design for the cheat menu.
+This client includes almost all CSM API additions from dragonfire, although it hasn't been documented (yet). It also includes many built-in client side mods and a new minimalistic design for the cheat menu.
 It has not been tested extensively, so it may not be stable. If any bug or error is found, please open an issue about it.
 
 # Features
 ### Menus
-  - Quick Menu: Dragonfire cheat menu. Use arrow keys to navegate through it and enter key to toggle cheats.
+  - Quick Menu: Dragonfire cheat menu. Use arrow keys to navigate through it and enter key to toggle cheats.
   - Click Menu: Use F8 key to open it. It displays different windows for each category and they can be moved. This menu was first implemented in [MineBoost Client](https://www.github.com/FoxLoveFire/MineBoost) by [Maintainer_ / FoxLoveFire](https://github.com/FoxLoveFire/), all credit goes to him.
 
 
